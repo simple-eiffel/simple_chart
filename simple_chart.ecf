@@ -17,6 +17,7 @@
 		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
 		<library name="simple_csv" location="D:\prod\simple_csv\simple_csv.ecf"/>
 		<library name="simple_file" location="D:\prod\simple_file\simple_file.ecf"/>
+		<library name="simple_json" location="D:\prod\simple_json\simple_json.ecf"/>
 		<cluster name="src" location="./src/" recursive="true">
 			<file_rule>
 				<exclude>/.git$</exclude>

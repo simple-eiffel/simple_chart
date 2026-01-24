@@ -22,6 +22,7 @@ feature {NONE} -- Initialization
 			create svg.make
 			create png.make
 			create pdf.make
+			pdf.use_chrome  -- Use Edge/Chrome for PDF generation
 			output_dir := "testing/output/"
 		end
 
@@ -187,9 +188,7 @@ feature -- PDF Tests
 			l_html: STRING
 			l_doc: SIMPLE_PDF_DOCUMENT
 		do
-			if not pdf.is_available then
-				print ("      (SKIPPED - wkhtmltopdf not installed)%N")
-			else
+			if pdf.is_available then
 				create l_html.make (8000)
 				l_html.append ("<!DOCTYPE html><html><head>")
 				l_html.append ("<title>Chart Report</title>")
@@ -246,9 +245,7 @@ feature -- PDF Tests
 			l_html: STRING
 			l_doc: SIMPLE_PDF_DOCUMENT
 		do
-			if not pdf.is_available then
-				print ("      (SKIPPED - wkhtmltopdf not installed)%N")
-			else
+			if pdf.is_available then
 				create l_html.make (10000)
 				l_html.append ("<!DOCTYPE html><html><head>")
 				l_html.append ("<title>Dashboard</title>")

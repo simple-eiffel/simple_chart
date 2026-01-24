@@ -1,0 +1,17 @@
+﻿Height vs Weight (ASCII)
+                                                           *
+                                                       *    
+                                                   *        
+                                              *             
+                                          *                 
+                                      *                     
+                                  *                         
+                              *                             
+                         *                                  
+                     *                                      
+                 *   *                                      
+             *                                              
+        *    *                                              
+    *   *                                                   
+*                                                           
+X: [62, 76] Hours  Y: [115, 210] Score

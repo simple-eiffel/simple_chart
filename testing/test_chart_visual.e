@@ -364,13 +364,18 @@ feature {NONE} -- File Output
 		end
 
 	write_output_32 (a_filename: STRING; a_content: STRING_32)
-			-- Write STRING_32 content to output file.
+			-- Write STRING_32 content to output file with UTF-8 encoding and BOM.
 		local
 			l_file: SIMPLE_FILE
 			l_ok: BOOLEAN
+			l_with_bom: STRING_32
 		do
+			-- Prepend Unicode BOM (U+FEFF) - SIMPLE_FILE.write_all handles UTF-8 encoding
+			create l_with_bom.make (a_content.count + 1)
+			l_with_bom.append_character ('%/0xFEFF/')
+			l_with_bom.append (a_content)
 			create l_file.make (output_dir + a_filename)
-			l_ok := l_file.write_all (a_content.to_string_8)
+			l_ok := l_file.write_all (l_with_bom)
 		end
 
 end

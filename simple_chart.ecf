@@ -21,6 +21,7 @@
 		<library name="simple_pdf" location="D:\prod\simple_pdf\simple_pdf.ecf"/>
 		<library name="simple_cairo" location="D:\prod\simple_cairo\simple_cairo.ecf"/>
 		<library name="simple_graphviz" location="D:\prod\simple_graphviz\simple_graphviz.ecf"/>
+		<library name="simple_encoding" location="D:\prod\simple_encoding\simple_encoding.ecf"/>
 		<cluster name="src" location="./src/" recursive="true">
 			<file_rule>
 				<exclude>/.git$</exclude>

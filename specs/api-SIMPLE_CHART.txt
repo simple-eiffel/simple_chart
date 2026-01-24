@@ -1,0 +1,236 @@
+================================================================================
+SIMPLE_CHART - Flat Short API Reference (Backwash from Implementation)
+================================================================================
+Generated: 2026-01-23
+Status: Reverse-engineered from implementation
+================================================================================
+
+class SIMPLE_CHART
+
+create
+    make
+
+feature -- Access
+
+    data_loader: CSV_DATA_LOADER
+        -- CSV data loader.
+
+    bar_renderer: BAR_CHART_RENDERER
+        -- Bar chart renderer.
+
+    table_renderer: TABLE_RENDERER
+        -- Table renderer.
+
+feature -- Status report
+
+    has_data: BOOLEAN
+        -- Is data loaded?
+
+    last_error: detachable STRING
+        -- Last error message if any.
+
+feature -- Element change
+
+    load_csv (a_path: READABLE_STRING_GENERAL)
+        -- Load CSV data from file at `a_path`.
+        require
+            path_not_empty: not a_path.is_empty
+        ensure
+            data_loaded_or_error: has_data or last_error /= Void
+
+    load_csv_string (a_content: READABLE_STRING_GENERAL)
+        -- Load CSV data from string `a_content`.
+        require
+            content_not_empty: not a_content.is_empty
+        ensure
+            data_loaded_or_error: has_data or last_error /= Void
+
+feature -- Output
+
+    render_bar_chart (a_label_column, a_value_column: INTEGER): STRING
+        -- Render bar chart using columns for labels and values.
+        require
+            has_data: has_data
+            label_column_valid: a_label_column >= 1 and a_label_column <= data_loader.column_count
+            value_column_valid: a_value_column >= 1 and a_value_column <= data_loader.column_count
+        ensure
+            result_not_empty: not Result.is_empty
+
+    render_table: STRING
+        -- Render data as formatted ASCII table.
+        require
+            has_data: has_data
+        ensure
+            result_not_empty: not Result.is_empty
+
+invariant
+    components_initialized: data_loader /= Void and bar_renderer /= Void and table_renderer /= Void
+    has_data_delegation: has_data = data_loader.has_data
+
+================================================================================
+CSV_DATA_LOADER
+================================================================================
+
+class CSV_DATA_LOADER
+
+create
+    make
+
+feature -- Access
+
+    row_count: INTEGER
+        -- Number of data rows (excluding header).
+        require
+            has_data: has_data
+
+    column_count: INTEGER
+        -- Number of columns.
+        require
+            has_data: has_data
+
+    headers: ARRAYED_LIST [STRING]
+        -- Column headers (first row of CSV).
+        require
+            has_data: has_data
+
+    all_rows: ARRAYED_LIST [ARRAYED_LIST [STRING]]
+        -- All data rows (excluding header).
+        require
+            has_data: has_data
+
+    column_values (a_column: INTEGER): ARRAYED_LIST [STRING]
+        -- Values from column `a_column` (1-based, excludes header).
+        require
+            has_data: has_data
+            column_valid: a_column >= 1 and a_column <= column_count
+
+    column_as_numbers (a_column: INTEGER): ARRAYED_LIST [REAL_64]
+        -- Numeric values from column `a_column` (1-based, excludes header).
+        require
+            has_data: has_data
+            column_valid: a_column >= 1 and a_column <= column_count
+
+feature -- Status report
+
+    has_data: BOOLEAN
+        -- Has data been loaded?
+
+feature -- Element change
+
+    load_from_file (a_path: READABLE_STRING_GENERAL)
+        -- Load CSV data from file at `a_path`.
+        require
+            path_not_empty: not a_path.is_empty
+
+    load_from_string (a_content: READABLE_STRING_GENERAL)
+        -- Load CSV data from string `a_content`.
+        require
+            content_not_empty: not a_content.is_empty
+
+invariant
+    parser_attached: csv_parser /= Void
+    headers_attached: cached_headers /= Void
+    data_consistency: has_data = (csv_parser.row_count > 0)
+    headers_match_columns: has_data implies (cached_headers.count = column_count)
+
+================================================================================
+BAR_CHART_RENDERER
+================================================================================
+
+class BAR_CHART_RENDERER
+
+create
+    make
+
+feature -- Access
+
+    output: STRING
+        -- Rendered output.
+
+    as_string: STRING
+        -- Get rendered chart as string.
+
+feature -- Settings
+
+    bar_width: INTEGER
+        -- Maximum width of bars in characters.
+
+    bar_character: CHARACTER
+        -- Character used for bar fill.
+
+    set_bar_width (a_width: INTEGER)
+        -- Set maximum bar width.
+        require
+            width_positive: a_width > 0
+        ensure
+            width_set: bar_width = a_width
+
+    set_bar_character (a_char: CHARACTER)
+        -- Set bar fill character.
+        ensure
+            character_set: bar_character = a_char
+
+feature -- Status report
+
+    is_rendered: BOOLEAN
+        -- Has a chart been rendered?
+
+feature -- Element change
+
+    render (a_labels: ARRAYED_LIST [STRING]; a_values: ARRAYED_LIST [REAL_64])
+        -- Render bar chart from labels and values.
+        require
+            labels_attached: a_labels /= Void
+            values_attached: a_values /= Void
+            same_count: a_labels.count = a_values.count
+        ensure
+            rendered_if_data: not a_labels.is_empty implies is_rendered
+
+feature -- Constants
+
+    Default_bar_width: INTEGER = 40
+        -- Default maximum bar width.
+
+invariant
+    output_attached: output /= Void
+    bar_width_positive: bar_width > 0
+    is_rendered_consistency: is_rendered = (not output.is_empty)
+
+================================================================================
+TABLE_RENDERER
+================================================================================
+
+class TABLE_RENDERER
+
+create
+    make
+
+feature -- Access
+
+    output: STRING
+        -- Rendered output.
+
+    as_string: STRING
+        -- Get rendered table as string.
+
+feature -- Status report
+
+    is_rendered: BOOLEAN
+        -- Has a table been rendered?
+
+feature -- Element change
+
+    render (a_headers: ARRAYED_LIST [STRING]; a_rows: ARRAYED_LIST [ARRAYED_LIST [STRING]])
+        -- Render table from headers and rows.
+        require
+            headers_attached: a_headers /= Void
+            rows_attached: a_rows /= Void
+        ensure
+            rendered_if_headers: not a_headers.is_empty implies is_rendered
+
+invariant
+    output_attached: output /= Void
+    column_widths_attached: column_widths /= Void
+    is_rendered_consistency: is_rendered = (not output.is_empty)
+
+================================================================================

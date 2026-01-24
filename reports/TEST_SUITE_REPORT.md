@@ -250,19 +250,209 @@ l_dummy := l_ctx.fill_rect (0, 0, width.to_real, height.to_real)
 
 ---
 
-## 6. Library Dependencies
+## 6. Simple Ecosystem Integration
 
-The test suite requires these `simple_*` libraries:
+A key aspect of this implementation is the strategic use of `simple_*` ecosystem libraries. Rather than reinventing functionality or using external tools, `simple_chart` leverages existing ecosystem capabilities to deliver multi-format output with minimal code.
+
+### 6.1 Library Dependency Overview
+
+| Library | Added For | Enables |
+|---------|-----------|---------|
+| `simple_file` | Original | File I/O with automatic UTF-8 encoding |
+| `simple_csv` | Original | CSV data loading for chart input |
+| `simple_json` | Original | JSON data loading for chart input |
+| `simple_cairo` | **NEW** | PNG raster image generation |
+| `simple_pdf` | **NEW** | PDF document generation |
+| `simple_graphviz` | **NEW** | Graph rendering infrastructure |
+| `simple_encoding` | **NEW** | UTF-8/Unicode text handling |
+
+### 6.2 Detailed Library Analysis
+
+#### simple_cairo (PNG Output)
+
+**Why Added:** To generate publication-quality PNG raster images from chart data.
+
+**What It Provides:**
+- `CAIRO_SURFACE` - Image surface for pixel-based rendering
+- `CAIRO_CONTEXT` - Drawing context with anti-aliased primitives
+- Fluent API for chained drawing operations
+- Direct PNG file output via `write_png`
+
+**Facilitates:**
+- 800x500 pixel chart images with smooth anti-aliasing
+- Color-coded bars, lines, and data points
+- Text labels rendered at precise positions
+- Professional-quality output suitable for reports and presentations
+
+**Code Pattern:**
+```eiffel
+create l_surface.make_image (width, height)
+l_ctx := l_surface.create_context
+l_dummy := l_ctx.set_color_hex (0x4A90D9)
+l_dummy := l_ctx.fill_rect (x, y, w, h)
+l_ok := l_surface.write_png (output_path)
+```
+
+**DLL Dependency:** Requires `cairo.dll` (2.3 MB) in execution directory.
+
+---
+
+#### simple_pdf (PDF Output)
+
+**Why Added:** To generate multi-page PDF documents containing embedded SVG charts.
+
+**What It Provides:**
+- `SIMPLE_PDF` - Main facade for PDF generation
+- `SIMPLE_PDF_DOCUMENT` - Generated document handle
+- Multiple rendering engines (wkhtmltopdf, Chrome/Edge)
+- Page size, orientation, and margin controls
+
+**Facilitates:**
+- Professional PDF reports with embedded charts
+- Multi-page dashboard documents
+- HTML-to-PDF conversion with full CSS support
+- Cross-platform output (uses Edge headless on Windows)
+
+**Key Discovery:** The default engine (wkhtmltopdf) requires separate installation. Switching to Chrome/Edge engine via `pdf.use_chrome` leverages the browser already present on Windows systems.
+
+**Code Pattern:**
+```eiffel
+create pdf.make
+pdf.use_chrome  -- Use Edge headless (available on all Windows)
+pdf.set_page_size ("Letter")
+pdf.set_orientation ("Landscape")
+l_doc := pdf.from_html (html_with_svg_charts)
+l_doc.save_to_file ("report.pdf")
+```
+
+---
+
+#### simple_graphviz (Graph Infrastructure)
+
+**Why Added:** To provide graph rendering capabilities and potential DOT format export.
+
+**What It Provides:**
+- Graph layout algorithms
+- DOT language support
+- SVG/PNG/PDF output options
+- C library integration via inline externals
+
+**Facilitates:**
+- Future network/relationship chart types
+- Graph-based visualizations
+- Alternative rendering pipeline for complex layouts
+
+**Note:** Currently used for infrastructure support; direct graph chart types may be added in future phases.
+
+---
+
+#### simple_encoding (UTF-8 Text)
+
+**Why Added:** To properly handle Unicode characters in text-based chart output.
+
+**What It Provides:**
+- `SIMPLE_ENCODING` - UTF-32 to UTF-8 conversion
+- `SIMPLE_ENCODING_DETECTOR` - BOM detection and validation
+- Proper handling of multi-byte sequences
+
+**Facilitates:**
+- Correct rendering of Unicode block characters (U+2581-U+2588) for sparklines
+- Proper encoding of braille patterns (U+2800-U+28FF) for line/scatter plots
+- UTF-8 BOM markers for Windows text editor compatibility
+
+**Key Discovery:** `SIMPLE_FILE.write_all` already performs UTF-8 encoding internally. The solution was to prepend the Unicode BOM character (U+FEFF) to STRING_32 content, letting `write_all` encode everything correctly.
+
+**Code Pattern:**
+```eiffel
+-- Prepend Unicode BOM, let SIMPLE_FILE handle UTF-8 encoding
+l_with_bom.append_character ('%/0xFEFF/')
+l_with_bom.append (chart_content)
+l_file.write_all (l_with_bom)  -- Outputs: EF BB BF + UTF-8 content
+```
+
+---
+
+#### simple_file (File I/O)
+
+**Original Dependency - Enhanced Usage**
+
+**What It Provides:**
+- Cross-platform file operations
+- Automatic UTF-8 encoding via `set_utf8_encoding`
+- Binary and text write modes
+
+**Facilitates:**
+- All text file output (22 files)
+- Proper encoding without manual byte manipulation
+- Consistent file handling across all output types
+
+---
+
+#### simple_csv (Data Loading)
+
+**Original Dependency**
+
+**What It Provides:**
+- CSV parsing with header support
+- Type-safe data extraction
+- Error handling for malformed data
+
+**Facilitates:**
+- Loading chart data from CSV files
+- Integration with external data sources
+- Bulk data import for chart generation
+
+---
+
+#### simple_json (Data Loading)
+
+**Original Dependency**
+
+**What It Provides:**
+- JSON parsing and generation
+- Nested object/array support
+- Type-safe value extraction
+
+**Facilitates:**
+- Loading chart data from JSON APIs
+- Configuration file support
+- Data interchange with web services
+
+---
+
+### 6.3 ECF Configuration
 
 ```xml
+<!-- Original dependencies -->
 <library name="simple_csv" location="D:\prod\simple_csv\simple_csv.ecf"/>
 <library name="simple_file" location="D:\prod\simple_file\simple_file.ecf"/>
 <library name="simple_json" location="D:\prod\simple_json\simple_json.ecf"/>
+
+<!-- NEW: Added for multi-format output -->
 <library name="simple_pdf" location="D:\prod\simple_pdf\simple_pdf.ecf"/>
 <library name="simple_cairo" location="D:\prod\simple_cairo\simple_cairo.ecf"/>
 <library name="simple_graphviz" location="D:\prod\simple_graphviz\simple_graphviz.ecf"/>
 <library name="simple_encoding" location="D:\prod\simple_encoding\simple_encoding.ecf"/>
 ```
+
+### 6.4 Ecosystem Benefits
+
+By leveraging existing `simple_*` libraries:
+
+1. **No External Tool Dependencies:** PDF generation uses Edge (already installed), not a separate tool like wkhtmltopdf
+2. **Consistent API Patterns:** All libraries follow the same facade/builder patterns
+3. **SCOOP Compatibility:** All dependencies are concurrency-safe
+4. **DBC Contracts:** All libraries enforce preconditions/postconditions
+5. **Minimal Code:** PNG output is ~480 lines; PDF integration is ~50 lines
+
+### 6.5 Lessons Learned
+
+| Challenge | Library Solution |
+|-----------|------------------|
+| "How to generate PNG?" | `simple_cairo` with inline C externals |
+| "How to generate PDF?" | `simple_pdf` with `use_chrome` for Edge |
+| "How to encode Unicode?" | `simple_file.write_all` handles it; just prepend BOM |
+| "How to avoid double-encoding?" | Don't pre-encode; let `simple_file` do it |
 
 ---
 

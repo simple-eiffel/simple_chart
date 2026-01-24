@@ -1,5 +1,8 @@
 # 7-Step Research: simple_* CLI Candidates
 
+
+**Date**: 2026-01-16
+
 **Date:** 2026-01-16
 **Author:** Claude + Larry
 **Status:** Research Complete

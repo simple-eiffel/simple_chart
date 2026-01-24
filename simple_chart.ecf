@@ -18,6 +18,9 @@
 		<library name="simple_csv" location="D:\prod\simple_csv\simple_csv.ecf"/>
 		<library name="simple_file" location="D:\prod\simple_file\simple_file.ecf"/>
 		<library name="simple_json" location="D:\prod\simple_json\simple_json.ecf"/>
+		<library name="simple_pdf" location="D:\prod\simple_pdf\simple_pdf.ecf"/>
+		<library name="simple_cairo" location="D:\prod\simple_cairo\simple_cairo.ecf"/>
+		<library name="simple_graphviz" location="D:\prod\simple_graphviz\simple_graphviz.ecf"/>
 		<cluster name="src" location="./src/" recursive="true">
 			<file_rule>
 				<exclude>/.git$</exclude>

@@ -233,7 +233,7 @@ feature {NONE} -- Rendering implementation
 			-- Render computed bins to output.
 		local
 			l_max_count: INTEGER
-			l_bar_width, l_bar_height: INTEGER
+			l_bar_width: INTEGER
 			l_row, l_bin: INTEGER
 			l_threshold: REAL_64
 			l_count: INTEGER

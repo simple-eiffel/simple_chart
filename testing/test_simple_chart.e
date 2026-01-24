@@ -17,11 +17,11 @@ feature -- Test: Creation
 			l_chart: SIMPLE_CHART
 		do
 			create l_chart.make
-			assert ("data_loader_exists", l_chart.data_loader /= Void)
+			assert ("csv_loader_exists", l_chart.csv_loader /= Void)
 			assert ("bar_renderer_exists", l_chart.bar_renderer /= Void)
 			assert ("table_renderer_exists", l_chart.table_renderer /= Void)
 			assert ("no_data_initially", not l_chart.has_data)
-			assert ("no_error_initially", l_chart.last_error = Void)
+			assert ("no_error_initially", l_chart.last_error.is_empty)
 		end
 
 feature -- Test: load_csv_string happy path
@@ -34,7 +34,7 @@ feature -- Test: load_csv_string happy path
 			create l_chart.make
 			l_chart.load_csv_string ("Name,Value%NAlice,100%NBob,200")
 			assert ("has_data", l_chart.has_data)
-			assert ("no_error", l_chart.last_error = Void)
+			assert ("no_error", l_chart.last_error.is_empty)
 		end
 
 	test_load_csv_string_single_row
@@ -55,7 +55,7 @@ feature -- Test: load_csv_string happy path
 			create l_chart.make
 			l_chart.load_csv_string ("A,B,C,D,E,F,G,H%N1,2,3,4,5,6,7,8")
 			assert ("has_data", l_chart.has_data)
-			assert ("column_count", l_chart.data_loader.column_count = 8)
+			assert ("column_count", l_chart.csv_loader.column_count = 8)
 		end
 
 feature -- Test: load_csv_string edge cases

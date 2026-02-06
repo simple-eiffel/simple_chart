@@ -10,3 +10,6 @@ EIFGENs/
 # OS
 .DS_Store
 Thumbs.dbtesting/output/
+*.melted
+*.epr
+*.log
